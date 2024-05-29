@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:modulo01/styles/styles.dart';
+import 'package:patrimonios/styles/styles.dart';
 
 class BtnHome extends StatefulWidget {
   final IconData icone;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:modulo01/controllers/cache.dart';
-import 'package:modulo01/styles/styles.dart';
+import 'package:patrimonios/controllers/cache.dart';
+import 'package:patrimonios/styles/styles.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});

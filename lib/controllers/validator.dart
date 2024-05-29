@@ -77,34 +77,18 @@ class ValidarDadosCadastro {
   }
 
   static validarNIF(String? value) {
-    int numeros = 0;
-
     if (value == null || value.isEmpty) {
       return 'Campo obrigatório';
     }
 
-    if (value.length < 7) {
-      return "Deve ter no mínimo 7 caracteres";
+    if (value.length < 7 || value.length > 7) {
+      return "Deve ter 7 caracteres";
     }
 
     for (int i = 0; i < value.length; i++) {
-      if (!value[i].contains(RegExp(r'[A-Z]')) &&
-          !value[i].contains(RegExp(r'[a-z]')) &&
-          !value[i].contains(RegExp(r'[0-9]')) &&
-          !value[i].contains('_') &&
-          !value[i].contains('.')) {
-        return 'Usuário possuí caracteres inválidos';
+      if (!value[i].contains(RegExp(r'[0-9]'))) {
+        return 'Apenas números';
       }
-    }
-
-    for (int i = 0; i < value.length; i++) {
-      if (value[i].contains(RegExp(r'[0-9]'))) {
-        numeros++;
-      }
-    }
-
-    if (numeros < 1) {
-      return 'Deve conter pelo menos um número';
     }
 
     return null;

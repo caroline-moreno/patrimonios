@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:modulo01/controllers/cadastro.dart';
-import 'package:modulo01/controllers/validator.dart';
-import 'package:modulo01/styles/styles.dart';
+import 'package:patrimonios/controllers/cadastro.dart';
+import 'package:patrimonios/controllers/validator.dart';
+import 'package:patrimonios/styles/styles.dart';
 
 class Cadastro extends StatefulWidget {
   const Cadastro({super.key});
@@ -13,56 +13,80 @@ class Cadastro extends StatefulWidget {
 
 class _CadastroState extends State<Cadastro> {
   String? nome;
-  String? email;
   String? nif;
+  String? email;
   String? senha;
   String? confirmarSenha;
-  File? imagem;
   final _formKey = GlobalKey<FormState>();
 
   bool obscureText = true;
+  bool obscureText2 = true;
+  bool _isVisible = false;
+  bool _isPasswordEightCharacters = false;
+  bool _isPasswordHighCharacter = false;
+  bool _isPasswordLowCharacter = false;
+  bool _isPasswordTwoNumbers = false;
 
-  gerarModal() {
+  onPasswordChanged(String password) {
+    setState(() {
+      _isPasswordEightCharacters = false;
+      if (password.length >= 8) _isPasswordEightCharacters = true;
+      _isPasswordHighCharacter = password.contains(RegExp(r'[A-Z]'));
+      _isPasswordLowCharacter = password.contains(RegExp(r'[a-z]'));
+      _isPasswordTwoNumbers = RegExp(r'.*[0-9].*[0-9]').hasMatch(password);
+    });
+  }
+
+  void gerarModal() {
     showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-      backgroundColor: Colors.white,
-        title: Text(
-          'Cancelar cadastro',
-          style: TextStyle(
-            fontFamily: Fontes.fonte,
-            color: Cores.cinza,
-          ),
+      builder: (BuildContext context) => Theme(
+        data: ThemeData(
+          dialogBackgroundColor: Cores.cinzaclaro,
         ),
-        content: Text(
-          'Deseja realmente cancelar seu cadastro no app?',
-          style: TextStyle(
-            fontFamily: Fontes.fonte,
-            color: Cores.cinza,
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'Não'),
-            child: Text(
-              'Não',
-              style: TextStyle(
-                fontFamily: Fontes.fonte,
-                color: Cores.cinza,
-              ),
+        child: AlertDialog(
+          elevation: 0, // Remover a sombra (elevation)
+          backgroundColor: Cores.cinzaclaro,
+          title: Text(
+            'Cancelar cadastro',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontFamily: Fontes.fonte,
+              color: Cores.cinza,
             ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/login'),
-            child: Text(
-              'Sim',
-              style: TextStyle(
-                fontFamily: Fontes.fonte,
-                color: Cores.cinza,
-              ),
+          content: Text(
+            'Deseja realmente cancelar seu cadastro no aplicativo?',
+            style: TextStyle(
+              fontFamily: Fontes.fonte,
+              color: Cores.cinza,
             ),
           ),
-        ],
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Não'),
+              child: Text(
+                'Não',
+                style: TextStyle(
+                  fontFamily: Fontes.fonte,
+                  color: Cores.cinza,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/login'),
+              child: Text(
+                'Sim',
+                style: TextStyle(
+                  fontFamily: Fontes.fonte,
+                  color: Cores.cinza,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -135,12 +159,11 @@ class _CadastroState extends State<Cadastro> {
                             ),
                           ),
                           errorStyle: TextStyle(color: Colors.white),
-
                         ),
                       ),
                       Container(height: 10),
                       TextFormField(
-                        keyboardType: TextInputType.name,
+                        keyboardType: TextInputType.number,
                         onChanged: (value) => nif = value,
                         validator: (value) =>
                             ValidarDadosCadastro.validarNIF(value),
@@ -159,7 +182,7 @@ class _CadastroState extends State<Cadastro> {
                         ),
                       ),
                       Container(height: 10),
-                    TextFormField(
+                      TextFormField(
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) => email = value,
                         validator: (value) =>
@@ -178,14 +201,16 @@ class _CadastroState extends State<Cadastro> {
                           errorStyle: TextStyle(color: Colors.white),
                         ),
                       ),
-                  
                       Container(height: 10),
                       TextFormField(
                         keyboardType: TextInputType.visiblePassword,
                         obscureText: obscureText,
                         validator: (value) =>
                             ValidarDadosCadastro.validarSenha(value),
-                        onChanged: (value) => senha = value,
+                        onChanged: (value) {
+                          senha = value;
+                          onPasswordChanged(value);
+                        },
                         decoration: InputDecoration(
                           fillColor: Colors.white,
                           filled: true,
@@ -198,7 +223,7 @@ class _CadastroState extends State<Cadastro> {
                               obscureText
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                                  color: Cores.cinza,
+                              color: Cores.cinza,
                             ),
                           ),
                           label: Text(
@@ -214,7 +239,7 @@ class _CadastroState extends State<Cadastro> {
                       Container(height: 10),
                       TextFormField(
                         keyboardType: TextInputType.visiblePassword,
-                        obscureText: obscureText,
+                        obscureText: obscureText2,
                         onChanged: (value) => confirmarSenha = value,
                         validator: (value) =>
                             ValidarDadosCadastro.validarConfirmarSenha(
@@ -225,13 +250,13 @@ class _CadastroState extends State<Cadastro> {
                           prefixIcon: const Icon(Icons.password),
                           suffixIcon: IconButton(
                             onPressed: () => setState(() {
-                              obscureText = !obscureText;
+                              obscureText2 = !obscureText2;
                             }),
                             icon: Icon(
-                              obscureText
+                              obscureText2
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                                  color: Cores.cinza,
+                              color: Cores.cinza,
                             ),
                           ),
                           fillColor: Colors.white,
@@ -247,29 +272,179 @@ class _CadastroState extends State<Cadastro> {
                         ),
                       ),
                       Container(height: 30),
+                      Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: _isPasswordEightCharacters
+                                  ? Colors.green
+                                  : Colors.transparent,
+                              border: _isPasswordEightCharacters
+                                  ? Border.all(color: Colors.transparent)
+                                  : Border.all(color: Colors.white),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.check,
+                                color: _isPasswordEightCharacters
+                                    ? Colors.white
+                                    : Cores.vermelho,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "A senha deve conter pelo menos 8 caracteres",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(height: 15),
+                      Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: _isPasswordLowCharacter
+                                  ? Colors.green
+                                  : Colors.transparent,
+                              border: _isPasswordLowCharacter
+                                  ? Border.all(color: Colors.transparent)
+                                  : Border.all(color: Colors.white),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.check,
+                                color: _isPasswordLowCharacter
+                                    ? Colors.white
+                                    : Cores.vermelho,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "A senha deve conter pelo menos uma letra minúscula",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(height: 15),
+                      Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: _isPasswordHighCharacter
+                                  ? Colors.green
+                                  : Colors.transparent,
+                              border: _isPasswordHighCharacter
+                                  ? Border.all(color: Colors.transparent)
+                                  : Border.all(color: Colors.white),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.check,
+                                color: _isPasswordHighCharacter
+                                    ? Colors.white
+                                    : Cores.vermelho,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "A senha deve conter pelo menos uma letra maiúscula",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(height: 15),
+                      Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: _isPasswordTwoNumbers
+                                  ? Colors.green
+                                  : Colors.transparent,
+                              border: _isPasswordTwoNumbers
+                                  ? Border.all(color: Colors.transparent)
+                                  : Border.all(color: Colors.white),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.check,
+                                color: _isPasswordTwoNumbers
+                                    ? Colors.white
+                                    : Cores.vermelho,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "A senha deve conter pelo menos dois números",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(height: 30),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                                'Ao se inscrever você concorda com os nossos Termos e Condições e Políticas de privacidade.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: Fontes.fonte,
-                                  color: Colors.white,
-                                ),
-                              ),
+                            'Ao se inscrever você concorda com os nossos Termos e Condições e Políticas de privacidade.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: Fontes.fonte,
+                              color: Colors.white,
+                            ),
+                          ),
                           Container(height: 30),
-                  
                           ElevatedButton(
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                CadastroController.logar(
-                                  email!,
-                                  senha!,
+                                CadastroController.registrar(
                                   nome!,
                                   nif!,
-                                  imagem!,
+                                  email!,
+                                  senha!,
                                   context,
                                 );
                               }

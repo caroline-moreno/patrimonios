@@ -1,38 +1,44 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:modulo01/widgets/toast.dart';
+import 'package:patrimonios/widgets/toast.dart';
 import 'package:http/http.dart' as http;
 
 class CadastroController {
-  static logar(
-    String email,
-    String senha,
+  static registrar(
     String nome,
     String nif,
-    File image,
+    String email,
+    String senha,
     context,
   ) async {
     try {
       final url = Uri.parse(
-        'http://10.91.234.24:3000/registro/validar',
+        'http://10.91.234.29:3000/registro/criar',
       );
 
-      final stream = http.ByteStream(image.openRead());
-      final length = await image.length();
-      final listFileName = image.path.split('/');
-      final fileName = listFileName[listFileName.length - 1];
-      final req = http.MultipartRequest('POST', url);
+      final Map<String, String> data = {
+        'nome': nome,
+        'nif': nif,
+        'email': email,
+        'senha': senha,
+      };
 
-      req.fields['email'] = email;
-      req.fields['senha'] = senha;
-      req.fields['nome'] = nome;
-      req.fields['nif'] = nif;
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: Uri(queryParameters: data).query,
+      );
 
-      final res = await req.send();
+      print(response.body);
 
-      if (res.statusCode == 201) {
+      if (response.statusCode == 201) {
         MyToast.gerarToast('Usuário cadastrado com sucesso!');
         Navigator.pushNamed(context, '/login');
+      } else if (response.statusCode == 400) {
+        MyToast.gerarToast('Erro nos dados enviados.');
+      } else if (response.statusCode == 409) {
+        MyToast.gerarToast('Já existe um usuário com este NIF.');
       } else {
         MyToast.gerarToast('Erro ao cadastrar');
       }
